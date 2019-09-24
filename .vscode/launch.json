@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "aaaa",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register",
+        "-r",
+        "tsconfig-paths/register"
+      ],
+      "args": ["${workspaceFolder}/src/index.ts"]
+    },
+    {
+      "name": "Current TS File",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/node_modules/ts-node/dist/bin.js",
+      "args": [
+        "${relativeFile}"
+      ],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector"
+    }
+  ]
+}

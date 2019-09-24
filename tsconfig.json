@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "target": "es3",
+    "removeComments": true,
+    "declaration": true,
+    "preserveConstEnums": true,
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "downlevelIteration": true,
+    "sourceMap": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "paths": {
+    }
+  },
+  "include": [
+    "src/**/*",
+    "__tests__/**/*"
+  ]
+}
