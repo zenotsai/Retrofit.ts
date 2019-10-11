@@ -1,6 +1,6 @@
 # Retrofit.ts
 
-基于注解实现的HTTP请求库，可作为Java的[Retrofit]库的(https://github.com/square/retrofit)的TypeScript版本的实现
+基于注解实现的HTTP请求库，可作为Java的[Retrofit](https://github.com/square/retrofit)库的TypeScript版本的实现
 
 
 
@@ -38,13 +38,14 @@ call.getUser({
 }).catch(() => {
 
 })
-```js
+```
 ## 拦截器
+
 - 实现Interceptor接口的handler方法即可
 - 分为请求拦截器和响应拦截器
 - 请求拦截器中，handler的参数和返回值为RequestConfig， 响应拦截器为ReftrofitResponse
 - handler方法如果不返回话，会终止后续拦截器的执行
-```javaScript
+```js
 class LoggerInterceptor implements Interceptor {
   handler(context: RequestConfig): RequestConfig {
     let header = '';
