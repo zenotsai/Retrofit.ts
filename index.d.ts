@@ -1,4 +1,5 @@
 import {
+  AxiosError,
   AxiosResponse,
   AxiosRequestConfig,
 } from 'axios';
@@ -41,23 +42,33 @@ export function Header(name: string): Function;
 export function Head(name: string): Function;
 
 export function Headers(header: string[]): Function;
+
+export interface ReftrofitError extends AxiosError {
+  [key: string]: any;
+}
+
+export type ErrorHandler = (rep: ReftrofitError) => void;
 declare namespace Retrofit {
   export class RetrofitBuilder {
     public create<T>(target: object): T;
   }
 
   export class Builder {
-    addReqInterceptor(): Builder;
+    addReqInterceptor(fn: Interceptor): Builder;
 
-    setDebug(): Builder;
+    setDebug(flag: boolean): Builder;
 
-    addRespInterceptor(): Builder;
+    addRespInterceptor(fn: Interceptor): Builder;
 
-    timeout(): Builder;
+    setTimeout(time: number): Builder;
 
-    baseUrl(url: string): Builder;
+    setBaseUrl(url: string): Builder;
 
-    headers(): Builder;
+    setHeaders(header: {
+      [key: string]: string;
+    }): Builder;
+
+    setErrorHandler(handler: ErrorHandler): Builder;
 
     build(): RetrofitBuilder;
   }

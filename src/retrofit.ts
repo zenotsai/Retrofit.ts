@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import InterceptorControll from './interceptor';
 import RequestOptionsBuiler from './core/requestBuilber';
 import Call from './core/Call';
-import { Interceptor } from '../src/interfaces';
+import { Interceptor, ErrorHandler } from './interfaces';
 import LoggerInterceptor from './interceptor/LoggerInterceptor';
 
 const getMethods = (target, methods = []): string[] => {
@@ -15,12 +15,14 @@ const getMethods = (target, methods = []): string[] => {
 export class Retrofit {
   private instance: AxiosInstance;
 
+  private errorHandler: ErrorHandler;
+
   private interceptorControll: InterceptorControll;
 
   private requestOptionsBuiler: RequestOptionsBuiler;
 
   public static Builder = class {
-    public mUrl: string;
+    public url: string;
 
     public debug: boolean;
 
@@ -28,9 +30,11 @@ export class Retrofit {
 
     public resInterceptor: Interceptor[] = [];
 
-    public mTimeout: number;
+    public timeout: number;
 
-    public mHeader: {
+    public errorHandler: ErrorHandler;
+
+    public header: {
       [key: string]: string;
     }
 
@@ -49,18 +53,25 @@ export class Retrofit {
       return this;
     }
 
-    timeout(time: number): this {
-      this.mTimeout = time;
+    setTimeout(time: number): this {
+      this.timeout = time;
       return this;
     }
 
-    baseUrl(url: string): this {
-      this.mUrl = url;
+    setBaseUrl(url: string): this {
+      this.url = url;
       return this;
     }
 
-    headers(header): this {
-      this.mHeader = header;
+    setHeaders(header: {
+      [key: string]: string;
+    }): this {
+      this.header = header;
+      return this;
+    }
+
+    setErrorHandler(handler: ErrorHandler): this {
+      this.errorHandler = handler;
       return this;
     }
 
@@ -69,23 +80,25 @@ export class Retrofit {
         this.addReqInterceptor(new LoggerInterceptor());
       }
       return new Retrofit({
+        errorHandler: this.errorHandler,
         resInterceptor: this.resInterceptor,
         reqInterceptor: this.reqInterceptor,
-        baseURL: this.mUrl,
-        timeout: this.mTimeout,
-        headers: this.mHeader,
+        baseURL: this.url,
+        timeout: this.timeout,
+        headers: this.header,
       });
     }
   }
 
   constructor({
-    baseURL, timeout, resInterceptor, reqInterceptor, headers,
+    errorHandler, baseURL, timeout, resInterceptor, reqInterceptor, headers,
   }) {
     const instance = axios.create({
       timeout,
       baseURL,
       headers,
     });
+    this.errorHandler = errorHandler;
     this.instance = instance;
     this.interceptorControll = new InterceptorControll(reqInterceptor, resInterceptor);
     this.requestOptionsBuiler = new RequestOptionsBuiler({ baseURL, headers });
@@ -97,7 +110,7 @@ export class Retrofit {
 
   create<T>(targetObj: any): T {
     const _this = this;
-    const prox = new Proxy(targetObj, {
+    const Prox = new Proxy(targetObj, {
       construct(target, args, newTarget) {
         const temp = new targetObj(args);
         getMethods(targetObj).filter((item) => item !== 'constructor').forEach((item) => {
@@ -106,9 +119,12 @@ export class Retrofit {
               const config = _this.requestOptionsBuiler.getBuilder(targetObj, item, args);
               const call = new Call(_this.instance);
               const fetch = call.enqueue.bind(call);
-              const promise = _this.interceptorControll.chain(config, fetch);
+              const promise = _this.interceptorControll.chain(config, fetch).catch((e) => {
+                _this.errorHandler && _this.errorHandler(e);
+                return Promise.reject(e);
+              });
               (<any>promise).cancel = (msg: string) => {
-                call.cancel(msg);
+                call.cancel.call(call, msg);
               };
               return promise;
             },
@@ -117,6 +133,6 @@ export class Retrofit {
         return temp;
       },
     });
-    return new prox();
+    return new Prox();
   }
 }

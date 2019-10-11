@@ -1,34 +1,32 @@
-# Retrofit.js
+# Retrofit.ts
 
-基于注解实现的HTTP请求库，可作为Java[Retrofit](https://github.com/square/retrofit)的TypeScript版本的实现
+基于注解实现的HTTP请求库，可作为Java的[Retrofit]库的(https://github.com/square/retrofit)的TypeScript版本的实现
+
 
 
 ##  使用者指南
-** 目前只支持TypeScript环境 **
+**目前只支持TypeScript环境**
 
-** npm i Retrofit.js --save
+```npm i retrofit.ts --save```
+
 ## 使用示例
-```javaScript
-import
-    Retrofit,
-    {
-      ReftrofitResponse, BaseUrl, GET, Query, Path, POST, Body, Header, Head, Headers,
-    }
-from 'Retrofit.js';
+```js
+import { Retrofit, ReftrofitResponse BaseUrl, GET, Query, Path, POST, Body, Header, Head, Headers } from 'Retrofit.js';
+
 @BaseUrl('/user')
 class Person {
   @GET('/getUser/:user.id')
-  getUser(@Path('user') user): Promise<ReftrofitResponse> & void { }
+  getUser(@Path('user') user): Promise<ReftrofitResponse> { }
 
   @POST('/addUser')
-  addUser(@Body('username') username): Promise<ReftrofitResponse> & void { }
+  addUser(@Body('username') username): Promise<ReftrofitResponse>  { }
 
   @POST('/login')
-  login(@Header('cookie') cookie): Promise<ReftrofitResponse> & void { }
+  login(@Header('cookie') cookie): Promise<ReftrofitResponse>  { }
 }
 
 let retrofit = new Retrofit.Builder()
-  .baseUrl('http://localhost:3007')
+  .setBaseUrl('http://localhost:3007')
   .build();
   
 // 发起请求
@@ -40,7 +38,7 @@ call.getUser({
 }).catch(() => {
 
 })
-```
+```js
 ## 拦截器
 - 实现Interceptor接口的handler方法即可
 - 分为请求拦截器和响应拦截器
@@ -68,6 +66,28 @@ let retrofit = new Retrofit.Builder()
   .addReqInterceptor(new LoggerInterceptor())
   .build();
 ```
+
+## 异常处理
+可在构建Retrofit时，进行全局异常处理
+```js
+let retrofit = new Retrofit.Builder()
+  .setBaseUrl('http://localhost:3007')
+  .setErrorHandler((error) => {
+      // error
+  })
+  .build();
+```
+
+## 请求取消
+```js
+const fetch = call.getUser({
+    id: '123',
+}, 'king');
+
+setTimeout(() => {
+    fetch.cancel();
+}, 2000)
+```
 ## :star: 目前支持的注解
 方法层级
 - GET (path: string)
@@ -79,7 +99,7 @@ let retrofit = new Retrofit.Builder()
 - Path (key: string)
 - Query (key: string)
 - Header (key: string) // 定义某个请求的header
-- Head (key: string)   // 为某个请求的header填充值
+- Head (key: string)   // 为某个请求的header填充
 
 class层级
 - BaseUrl (path: string)

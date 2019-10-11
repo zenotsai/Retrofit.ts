@@ -2,7 +2,7 @@ import axios, { Canceler, AxiosInstance, AxiosResponse } from 'axios';
 import { Call, ReftrofitResponse, RequestConfig } from '../interfaces/index';
 
 const { CancelToken } = axios;
-
+const source = CancelToken.source();
 
 export default class CallAxios implements Call {
   private instance: AxiosInstance;
@@ -15,21 +15,18 @@ export default class CallAxios implements Call {
   }
 
   enqueue<T = any>(reqConfig: RequestConfig): Promise<AxiosResponse<T>> {
-    return new Promise((resolve, reject) => {
-      this.instance({
-        ...reqConfig,
-        cancelToken: new CancelToken(((c): void => {
-          this.cancelToken = c;
-        })),
-      }).then((result) => {
-        resolve(result);
-      }).catch((e) => {
-        reject(e);
-      });
+    const that = this;
+    return this.instance({
+      ...reqConfig,
+      cancelToken: new CancelToken(((c): void => {
+        that.cancelToken = c;
+      })),
+      // cancelToken: source.token,
     });
   }
 
   cancel(msg?: string): void {
-    this.cancelToken(msg);
+    // source.cancel(msg);
+    this.cancelToken && this.cancelToken();
   }
 }

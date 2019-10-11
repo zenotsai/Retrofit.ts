@@ -1,6 +1,7 @@
 import {
   AxiosResponse,
   AxiosRequestConfig,
+  AxiosError,
 } from 'axios';
 
 import { ClassMetaData, MethodMeteData } from '../core/index';
@@ -34,12 +35,17 @@ export interface RequestOptiosHandler {
     classMetaData: ClassMetaData,
     params: any[], config: RequestConfig): RequestConfig;
 }
+export type ErrorHandler = (rep: ReftrofitError) => void;
 export interface RequestConfig extends AxiosRequestConfig {
   getCancelMessage?(): string;
 }
-export interface ReftrofitResponse<T = any> extends AxiosResponse<T> {
+export interface ReftrofitError extends AxiosError {
   [key: string]: any;
 }
+export interface Reponse<T = any> extends AxiosResponse<T> {
+  [key: string]: any;
+}
+export type ReftrofitResponse = Reponse & void;
 export interface Interceptor {
   handler(
     context: RequestConfig | ReftrofitResponse): RequestConfig | ReftrofitResponse;

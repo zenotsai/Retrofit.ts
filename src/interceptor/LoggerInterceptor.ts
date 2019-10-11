@@ -11,7 +11,7 @@ export default class LoggerInterceptor implements Interceptor {
         });
       }
     }
-    console.log('config11  ', context);
+    console.log('config  ', context);
     console.log(`curl -X ${context.method}  '${context.baseURL}${context.url}'  ${header}`);
     return context;
   }
